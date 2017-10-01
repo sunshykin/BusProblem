@@ -24,6 +24,10 @@ namespace BusProblem
             }
         }
 
+        /// <summary>
+        /// Загрузка информации и файла
+        /// </summary>
+        /// <param name="path">Путь до файла</param>
         private void LoadFile(string path)
         {
             StreamReader stream = new StreamReader(path);
@@ -43,6 +47,10 @@ namespace BusProblem
             InitializeSelect(stopCount);
         }
 
+        /// <summary>
+        /// Инициализация элементов для выбора пользователя
+        /// </summary>
+        /// <param name="stopCount">Количество остановок</param>
         private void InitializeSelect(int stopCount)
         {
             startStopLabel.Visible = true;
@@ -59,10 +67,6 @@ namespace BusProblem
             endStopCombo.Items.AddRange(arr);
 
             timePicker.Value = new DateTime(2017, 01, 01) + map.GetLowestUpTime();
-        }
-
-        private void Start()
-        {
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -85,6 +89,7 @@ namespace BusProblem
             }
             fastestListBox.Items.Clear();
             cheapestListBox.Items.Clear();
+            //Добавляем строку состояния о прибытии пассажира
             fastestListBox.Items.Add(
                 $"[{timePicker.Value.TimeOfDay:hh\\:mm}] Прибытие на начальную остановку");
             var fastestRoute = map.FindRoute(Convert.ToInt32(timePicker.Value.TimeOfDay.TotalMinutes),
@@ -101,16 +106,29 @@ namespace BusProblem
             routeControl.Visible = true;
         }
 
-        private void AnalyzeRoute(List<Edge> route, bool byCost)
+        /// <summary>
+        /// Анализ маршрутного листа и вывод его для пользователя
+        /// </summary>
+        /// <param name="route">Маршрутный лист</param>
+        /// <param name="byTime">Индикатор состояния</param>
+        private void AnalyzeRoute(List<Edge> route, bool byTime)
         {
             ListBox list;
-            if (byCost)
+            //Если нужен быстрый маршрут
+            if (byTime)
                 list = fastestListBox;
             else
                 list = cheapestListBox;
+            //Проверяем, удалось ли построть маршрут
+            if (route.Count == 0)
+            {
+                list.Items.Clear();
+                list.Items.Add("Не удалось построить маршрут, выберите другое время");
+            }
             for (int i = 0; i < route.Count; i++)
             {
-                if (byCost)
+                //Если нужен быстрый маршрут
+                if (byTime)
                 {
                     list.Items.Add(
                         String.Format("[{0:hh\\:mm}] Отправление автобуса №{1} от остановки №{2}.",
@@ -145,7 +163,6 @@ namespace BusProblem
                 }
             }
             list.Items.Add("Конечная остановка.");
-
         }
     }
 }
