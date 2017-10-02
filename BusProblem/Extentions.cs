@@ -37,19 +37,20 @@ namespace BusProblem
         /// <param name="list">Список вершин</param>
         /// <param name="edges">Список ребер</param>
         /// <returns>Возвращает ссылку на следующую вершину</returns>
-        public static Vertex GetNextVertex<T>(this List<T> list, List<Edge> edges)
+        public static Vertex GetNextVertex<T>(this List<T> list, List<Edge> edges, bool byTime)
             where T : Vertex
         {
-            list = list.Where(x => !x.isChecked).ToList();
+            list = list.Where(x => !x.isChecked && (byTime ? x.timeOfStop != 0 : x.costOfStop != 0)).ToList();
+
             int min = Int32.MaxValue;
             Vertex result = new Vertex();
             foreach (var v in list)
             {
-                //Проверяем вершину по минимальному количеству входящий непроверенных ребер
-                int count = edges.Where(x => x.to == v && !x.isChecked).Count();
-                if (count < min)
+                //Проверяем вершину по минимальному весу
+                int weight = byTime ? v.timeOfStop : v.costOfStop;
+                if (weight < min)
                 {
-                    min = count;
+                    min = weight;
                     result = v;
                 }
             }

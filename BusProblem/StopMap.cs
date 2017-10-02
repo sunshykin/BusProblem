@@ -88,9 +88,8 @@ namespace BusProblem
                 {
                     r.isChecked = true;
                     int newTime = r.bus.TimeOfStop(r.from.timeOfStop + r.time, r.to.num);
-                    //Если указанное пользователем время раньше времени отправления автобуса
-                    //или во время пути часы покажут за полночь (и все автобусы перестанут ездить)
-                    if (startTime < r.bus.startTime || newTime > 1440 || newTime < startTime)
+                    //Если во время пути часы покажут за полночь (и все автобусы перестанут ездить)
+                    if (newTime > 1440 || newTime < startTime)
                         continue;
                     if (byTime) //если расчет по времени
                     {
@@ -113,6 +112,7 @@ namespace BusProblem
                         {
                             //Заменяем путь, если он был, на более дешевый
                             r.to.minRoute.Clear();
+                            r.to.timeOfStop = newTime;
                             r.to.costOfStop = newCost;
                             if (r.from.minRoute.Count > 0)
                                 r.to.minRoute.AddRange(r.from.minRoute);
@@ -123,7 +123,7 @@ namespace BusProblem
                 //Прошли все пути вершины и пометили ее
                 curVertex.isChecked = true;
                 //Подбираем следующую вершину для проверки
-                curVertex = stops.GetNextVertex(routes);
+                curVertex = stops.GetNextVertex(routes, byTime);
             }
             return endVertex.minRoute;
         }

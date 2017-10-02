@@ -62,6 +62,7 @@ namespace BusProblem
             searchButton.Visible = true;
 
             startStopCombo.Items.Clear();
+            endStopCombo.Items.Clear();
             string[] arr = Enumerable.Range(1, stopCount).Select(x => x.ToString()).ToArray();
             startStopCombo.Items.AddRange(arr);
             endStopCombo.Items.AddRange(arr);
@@ -87,11 +88,6 @@ namespace BusProblem
                 MessageBox.Show("Выберите пункт отправления и прибытия", "Ошибка", MessageBoxButtons.OK);
                 return;
             }
-            fastestListBox.Items.Clear();
-            cheapestListBox.Items.Clear();
-            //Добавляем строку состояния о прибытии пассажира
-            fastestListBox.Items.Add(
-                $"[{timePicker.Value.TimeOfDay:hh\\:mm}] Прибытие на начальную остановку");
             var fastestRoute = map.FindRoute(Convert.ToInt32(timePicker.Value.TimeOfDay.TotalMinutes),
                 Convert.ToInt32(startStopCombo.SelectedItem), 
                 Convert.ToInt32(endStopCombo.SelectedItem), true);
@@ -119,6 +115,10 @@ namespace BusProblem
                 list = fastestListBox;
             else
                 list = cheapestListBox;
+            list.Items.Clear();
+            //Добавляем строку состояния о прибытии пассажира
+            list.Items.Add(
+                $"[{timePicker.Value.TimeOfDay:hh\\:mm}] Прибытие на начальную остановку");
             //Проверяем, удалось ли построть маршрут
             if (route.Count == 0)
             {
@@ -132,7 +132,7 @@ namespace BusProblem
                 {
                     list.Items.Add(
                         String.Format("[{0:hh\\:mm}] Отправление автобуса №{1} от остановки №{2}.",
-                            TimeSpan.FromMinutes(route[i].to.timeOfStop), map.NumOfBus(route[i].bus),
+                            TimeSpan.FromMinutes(route[i].to.timeOfStop - route[i].time), map.NumOfBus(route[i].bus),
                             route[i].from.num));
                     list.Items.Add(String.Format("[{0:hh\\:mm}] Прибытие на остановку №{1}.",
                         TimeSpan.FromMinutes(route[i].to.timeOfStop), route[i].to.num));
@@ -148,12 +148,14 @@ namespace BusProblem
                     {
                         list.Items.Add(
                             String.Format("Посадка на автобус №{0} (стоимость поездки {1} руб).",
-                            map.NumOfBus(route[i].bus), route[i].bus.cost));
+                                map.NumOfBus(route[i].bus), route[i].bus.cost));
                     }
                     list.Items.Add(
-                        String.Format("Отправление автобуса №{0} от остановки №{1}.",
-                        map.NumOfBus(route[i].bus), route[i].from.num));
-                    list.Items.Add(String.Format("Прибытие на остановку №{0}.", route[i].to.num));
+                        String.Format("[{0:hh\\:mm}] Отправление автобуса №{1} от остановки №{2}.",
+                            TimeSpan.FromMinutes(route[i].to.timeOfStop - route[i].time), 
+                            map.NumOfBus(route[i].bus), route[i].from.num));
+                    list.Items.Add(String.Format("[{0:hh\\:mm}] Прибытие на остановку №{1}.",
+                        TimeSpan.FromMinutes(route[i].to.timeOfStop), route[i].to.num));
                     if (i != route.Count - 1 && route[i].bus != route[i + 1].bus)
                     {
                         list.Items.Add(
